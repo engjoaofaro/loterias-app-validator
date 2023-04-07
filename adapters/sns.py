@@ -22,7 +22,7 @@ def check_subscription(email):
 def subscribe(email):
     client.subscribe(
         TopicArn=os.getenv('TOPIC_ARN'),
-        Protocol='email',
+        Protocol='email-json',
         Endpoint=email,
         Attributes={}
     )
