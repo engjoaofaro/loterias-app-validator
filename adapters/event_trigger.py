@@ -10,7 +10,7 @@ def schedule():
         FlexibleTimeWindow={
             'Mode': 'OFF'
         },
-        ScheduleExpression='cron(00 22 * * ? *)',
+        ScheduleExpression='cron(00 01 * * ? *)',
         Target={
             'Arn': os.getenv('TARGET_ARN'),
             'RoleArn': os.getenv('ROLE_ARN')
