@@ -15,6 +15,7 @@ def lambda_handler(event, context):
     item = event['Records'][0]['body']
     item = json.loads(item)
     email = item['email']
+    game_type = item['gameType']
 
     sub = check_subscription(email)
 
@@ -24,7 +25,7 @@ def lambda_handler(event, context):
         print("Email já inscrito no tópico")
 
     print("Ativando evento...")
-    activate()
+    activate(game_type)
     print("Evento ativado")
 
     send(item, table)
