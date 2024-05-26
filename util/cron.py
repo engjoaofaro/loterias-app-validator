@@ -21,13 +21,13 @@ def get_cron(game_type):
         return cron
     if game_type == 2:
         if index_week == 7:
-            cron = 'cron(50 23 ? * 2 *)'
+            cron = 'cron(45 23 ? * 2 *)'
         return cron
     if game_type == 3:
         if index_week == 1 or index_week > 5:
-            cron = 'cron(50 23 ? * 2 *)'
+            cron = 'cron(40 23 ? * 2 *)'
         if index_week == 2 or index_week == 3:
-            cron = 'cron(50 23 ? * 4 *)'
+            cron = 'cron(40 23 ? * 4 *)'
         if index_week == 4 or index_week == 5:
-            cron = 'cron(50 23 ? * 6 *)'
+            cron = 'cron(40 23 ? * 6 *)'
         return cron
