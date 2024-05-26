@@ -9,7 +9,6 @@ client = boto3.client('scheduler')
 
 
 def schedule(game_type):
-    index_megasena = [2, 4, 6]
     cron = 'cron(00 01 * * ? *)'
     today = datetime.now()
     fuz = timezone('America/Sao_Paulo')
@@ -17,20 +16,25 @@ def schedule(game_type):
     index_week = date_sao_paulo.isoweekday()
 
     if game_type == 1:
-        if index_week in index_megasena:
-            cron = 'cron(50 23 ? * '+str(index_week)+' *)'
-        else:
-            if index_week <= 2:
-                cron = 'cron(50 23 ? * 3 *)'
-            elif index_week == 3 or index_week == 4:
-                cron = 'cron(50 23 ? * 5 *)'
-            elif index_week == 5 or index_week == 6:
-                cron = 'cron(50 23 ? * 7 *)'
-            elif index_week == 7:
-                cron = 'cron(50 23 ? * 3 *)'
+        if index_week <= 2:
+            cron = 'cron(50 23 ? * 3 *)'
+        elif index_week == 3 or index_week == 4:
+            cron = 'cron(50 23 ? * 5 *)'
+        elif index_week == 5 or index_week == 6:
+            cron = 'cron(50 23 ? * 7 *)'
+        elif index_week == 7:
+            cron = 'cron(50 23 ? * 3 *)'
+        update_schedule('schedule-step-function-flow', cron)
 
+    if game_type == 2:
+        if index_week == 7:
+            cron = 'cron(50 23 ? * 2 *)'
+        update_schedule('schedule-step-function-flow_2', cron)
+
+
+def update_schedule(name, cron):
     client.update_schedule(
-        Name='schedule-step-function-flow',
+        Name=name,
         FlexibleTimeWindow={
             'Mode': 'OFF'
         },
