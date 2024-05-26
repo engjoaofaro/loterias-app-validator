@@ -15,6 +15,10 @@ def schedule(game_type):
         cron = get_cron(2)
         update_schedule('schedule-step-function-flow_2', cron)
 
+    if game_type == 3:
+        cron = get_cron(3)
+        update_schedule('schedule-step-function-flow_3', cron)
+
 
 def update_schedule(name, cron):
     client.update_schedule(
