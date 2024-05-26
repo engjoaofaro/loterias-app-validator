@@ -15,20 +15,19 @@ def schedule(game_type):
         today = datetime.now()
         fuz = timezone('America/Sao_Paulo')
         date_sao_paulo = today.astimezone(fuz)
-        index_week = date_sao_paulo.weekday()
-        print(index_week)
+        index_week = date_sao_paulo.isoweekday()
 
         if index_week in index_megasena:
-            cron = 'cron(00 01 ? * '+str(index_week)+' *)'
+            cron = 'cron(50 23 ? * '+str(index_week)+' *)'
         else:
-            if index_week < 2:
-                cron = 'cron(00 01 ? * 2 *)'
-            elif index_week < 4:
-                cron = 'cron(00 01 ? * 4 *)'
-            elif index_week < 6:
-                cron = 'cron(00 01 ? * 6 *)'
+            if index_week <= 2:
+                cron = 'cron(50 23 ? * 3 *)'
+            elif index_week == 3 or index_week == 4:
+                cron = 'cron(50 23 ? * 5 *)'
+            elif index_week == 5 or index_week == 6:
+                cron = 'cron(50 23 ? * 7 *)'
             elif index_week == 7:
-                cron = 'cron(00 01 ? * 2 *)'
+                cron = 'cron(50 23 ? * 3 *)'
 
     client.update_schedule(
         Name='schedule-step-function-flow',
@@ -36,6 +35,7 @@ def schedule(game_type):
             'Mode': 'OFF'
         },
         ScheduleExpression=cron,
+        ScheduleExpressionTimezone='America/Sao_Paulo',
         Target={
             'Arn': os.getenv('TARGET_ARN'),
             'RoleArn': os.getenv('ROLE_ARN')
