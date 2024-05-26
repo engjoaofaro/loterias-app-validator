@@ -11,12 +11,12 @@ client = boto3.client('scheduler')
 def schedule(game_type):
     index_megasena = [2, 4, 6]
     cron = 'cron(00 01 * * ? *)'
-    if game_type == 1:
-        today = datetime.now()
-        fuz = timezone('America/Sao_Paulo')
-        date_sao_paulo = today.astimezone(fuz)
-        index_week = date_sao_paulo.isoweekday()
+    today = datetime.now()
+    fuz = timezone('America/Sao_Paulo')
+    date_sao_paulo = today.astimezone(fuz)
+    index_week = date_sao_paulo.isoweekday()
 
+    if game_type == 1:
         if index_week in index_megasena:
             cron = 'cron(50 23 ? * '+str(index_week)+' *)'
         else:
@@ -39,6 +39,6 @@ def schedule(game_type):
         Target={
             'Arn': os.getenv('TARGET_ARN'),
             'RoleArn': os.getenv('ROLE_ARN')
-            },
+        },
         State='ENABLED'
     )
