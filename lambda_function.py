@@ -4,7 +4,6 @@ import logging
 
 from adapters.dynamo import send_to_dynamo as send
 from adapters.sns import check_subscription, subscribe
-from adapters.event_trigger import schedule as activate
 from util.validation import validate_item
 
 logger = logging.getLogger()
@@ -33,7 +32,8 @@ def lambda_handler(event, context):
                 else:
                     logger.info("E-mail já inscrito no tópico")
 
-            activate(item['gameType'])
+            # A apuração roda por agendamento diário (EventBridge) — o validador
+            # não gerencia mais schedules. Aqui apenas persistimos a aposta.
             send(item, table)
             logger.info("Aposta processada: voucher=%s", item['voucher'])
         except Exception as error:  # noqa: BLE001 - isola a falha por mensagem
