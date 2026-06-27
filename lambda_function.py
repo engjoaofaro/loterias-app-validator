@@ -1,31 +1,43 @@
 import boto3
 import json
+import logging
+
 from adapters.dynamo import send_to_dynamo as send
-from adapters.sns import check_subscription
-from adapters.sns import subscribe
+from adapters.sns import check_subscription, subscribe
 from adapters.event_trigger import schedule as activate
+from util.validation import validate_item
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 dynamodb = boto3.resource('dynamodb')
+TABLE_NAME = 'Game'
 
 
 def lambda_handler(event, context):
-    print("Receiving event: {} and context: {}", event, context)
-    table = dynamodb.Table('Game')
+    """Consome o GameDto da fila SQS: valida, inscreve e-mail (opcional),
+    agenda a apuração e persiste a aposta. Processa TODOS os records do batch
+    e usa partial batch response (requer ReportBatchItemFailures na ESM)."""
+    table = dynamodb.Table(TABLE_NAME)
+    failures = []
 
-    item = event['Records'][0]['body']
-    item = json.loads(item)
-    email = item['email']
-    game_type = item['gameType']
+    for record in event.get('Records', []):
+        message_id = record.get('messageId')
+        try:
+            item = validate_item(json.loads(record['body']))
+            email = item['email']
 
-    sub = check_subscription(email)
+            if email:
+                if not check_subscription(email):
+                    subscribe(email)
+                else:
+                    logger.info("E-mail já inscrito no tópico")
 
-    if not sub:
-        subscribe(email)
-    if sub:
-        print("Email já inscrito no tópico")
+            activate(item['gameType'])
+            send(item, table)
+            logger.info("Aposta processada: voucher=%s", item['voucher'])
+        except Exception as error:  # noqa: BLE001 - isola a falha por mensagem
+            logger.exception("Falha ao processar mensagem %s: %s", message_id, error)
+            failures.append({"itemIdentifier": message_id})
 
-    print("Ativando evento...")
-    activate(game_type)
-    print("Evento ativado")
-
-    send(item, table)
+    return {"batchItemFailures": failures}

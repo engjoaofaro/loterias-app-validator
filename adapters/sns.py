@@ -1,21 +1,24 @@
 import boto3
 import os
 
+from util.validation import is_subscribed
+
 client = boto3.client('sns')
 
 
 def check_subscription(email):
-    print(email)
-    response = client.list_subscriptions_by_topic(
-        TopicArn=os.getenv('TOPIC_ARN'),
-        NextToken=''
-    )
-    subscriptions = response['Subscriptions']
-
-    for i in subscriptions:
-        if i['Endpoint'] == email:
+    """Verifica se o e-mail já está inscrito no tópico, paginando os resultados."""
+    topic_arn = os.getenv('TOPIC_ARN')
+    next_token = None
+    while True:
+        kwargs = {'TopicArn': topic_arn}
+        if next_token:
+            kwargs['NextToken'] = next_token
+        response = client.list_subscriptions_by_topic(**kwargs)
+        if is_subscribed(response.get('Subscriptions', []), email):
             return True
-        else:
+        next_token = response.get('NextToken')
+        if not next_token:
             return False
 
 
